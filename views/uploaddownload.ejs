@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+      <style>
+          #progress{
+              width: 0;
+              height: 10px;
+              background-color: green;
+              margin-bottom:40px;
+          }
+      </style>
+  </head>
+  <body>
+  <p><a href="/">返回</a></p>
+    <h1>上传下载进度</h1>
+
+  <div id="progress"></div>
+
+    <form method="post" action="/upload" >
+      <p><input type="file" name="file"/></p>
+      <p><input type="submit" value="提交"/></p>
+      <div id="upload-result"></div>
+    </form>
+
+  <form >
+      <p><input type="text" name="name"/></p>
+      <p><input type="submit" value="下载"/></p>
+  </form>
+    <script>
+      /*上传文件*/
+      document.forms[0].onsubmit=function(event){
+        var xhr=new XMLHttpRequest();
+        xhr.open('post','../upload',true);
+        xhr.upload.onprogress = function(pevent){
+            if (pevent.lengthComputable) {
+                var percentComplete = pevent.loaded / pevent.total;
+                document.getElementById('progress').style.width=percentComplete*400+'px';
+            }
+        };
+        xhr.upload.onload=function(){
+            document.getElementById('progress').style.width='0px'
+        };
+//        xhr.onload=function(){
+//              document.getElementById('upload-result').innerText=xhr.response.file;
+//          }
+        var data=new FormData(document.forms[0]);
+        xhr.responseType='json';
+        xhr.send(data);
+        event.preventDefault();
+      }
+     function updateComplete(){
+         document.getElementById('progress').style.width='0px'
+     }
+      function updateProgress (event) {
+          if (event.lengthComputable) {
+              var percentComplete = event.loaded / event.total;
+              document.getElementById('progress').style.width=percentComplete*400+'px';
+          }
+      }
+      /*下载文件*/
+        document.forms[1].onsubmit=function(){
+            var file=document.forms[1].name.value;
+            if(file.length==0)
+                return;
+            var xhr=new XMLHttpRequest();
+            xhr.open('get',file,true);
+            xhr.onload=function(){
+                updateComplete();
+                alert(xhr.responseText);
+            }
+            xhr.onprogress = updateProgress;
+            xhr.send();
+            event.preventDefault();
+        }
+    </script>
+  </body>
+</html>

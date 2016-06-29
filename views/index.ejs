@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+
+    <form action="192.168.1.112:3000/httprequest">
+  <select name="type">
+    <option value="post">post</option>
+    <option value="get">get</option>
+    <option value="delete">delete</option>
+    <option value="put">put</option>
+  </select>
+    <br/>
+    <select name="data-type">
+      <option value="document">document</option>
+      <option value="text">text</option>
+      <option value="json">json</option>
+
+    </select>
+    <br/>
+
+  <button type="submit" >submit</button>
+    </form>
+<div id="div"></div>
+
+    <script>
+      document.forms[0].onsubmit=function(event){
+         ajax({
+           url:'http://192.168.1.112:3000/api/getlist',
+           data:'pageindex=1&pagesize=10',
+           type:'post',
+           datatype:'json',
+           success:function(data){
+             alert(JSON.stringify(data));
+           },
+           error:function(data){
+             alert(JSON.stringify(data));
+           }
+
+         });
+        event.preventDefault();
+      }
+
+
+      function doresult(data){
+        document.getElementById('result').innerText=JSON.stringify(data);
+      }
+
+      function ajax(config){
+        //{url:'',data:'',type:'',dataType:'',success:null,error:null}
+        var xhr=new XMLHttpRequest();
+        xhr.onload=function(){
+          if(typeof config.success=='function')
+            config.success(xhr.response||xhr.responseText||xhr.responseXML);
+        }
+        xhr.onerror=function(){
+          if(typeof config.error=='function')
+            config.error(xhr.responseText);
+        }
+        if(config.type=='get')
+          config.url+='?'+config.data;
+        xhr.open(config.type,config.url);
+
+        xhr.responseType=config.dataType;
+        if(config.type=='post'){
+          xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+          xhr.send(config.data);
+        }
+
+        xhr.send(null);
+
+      }
+
+
+      var xhr=new XMLHttpRequest();
+      xhr.onload=function(event){
+        if(event.target.status>=200&&xhr.status<=300){
+
+         var imgs= JSON.stringify(event.target.response)
+          alert(imgs[10])
+
+//          document.getElementById('div').innerHTML=
+
+        }
+        else{
+          alert(event.target.responseText);
+        }
+      };
+      xhr.open('post','http://192.168.1.112:3000/api/getlist',true);
+      xhr.responseType='json';
+
+      xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+      xhr.send('pageindex=1&pagesize=10');
+    </script>
+  </body>
+</html>
